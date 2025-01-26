@@ -1,4 +1,4 @@
-import { Paths } from "@/navigation/paths";
+import { Paths } from "@/src/navigation/paths";
 import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
