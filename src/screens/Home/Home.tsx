@@ -1,9 +1,12 @@
-import { Text, View } from "react-native"
+import { Text, View } from "react-native";
+import SafeScreen from "@/src/components/global/templates/SafeScreen";
 
 export default function Home() {
   return (
-    <View>
+    <SafeScreen>
+      <View>
         <Text>Home</Text>
-    </View>
-  )
+      </View>
+    </SafeScreen>
+  );
 }
