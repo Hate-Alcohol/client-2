@@ -11,8 +11,6 @@ import com.facebook.react.defaults.DefaultReactActivityDelegate
 
 import expo.modules.ReactActivityDelegateWrapper
 
-import android.os.Bundle;
-
 class MainActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     // Set the theme to AppTheme BEFORE onCreate to support
@@ -38,7 +36,7 @@ class MainActivity : ReactActivity() {
   override fun createReactActivityDelegate(): ReactActivityDelegate {
     return ReactActivityDelegateWrapper(
           this,
-          BuildConfig.IS_NEW_ARCHITECTURE_ENABLED,
+          true,
           object : DefaultReactActivityDelegate(
               this,
               mainComponentName,
@@ -63,9 +61,5 @@ class MainActivity : ReactActivity() {
       // Use the default back button implementation on Android S
       // because it's doing more than [Activity.moveTaskToBack] in fact.
       super.invokeDefaultOnBackPressed()
-  }
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(null)
   }
 }
