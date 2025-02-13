@@ -2,7 +2,7 @@ import {Paths} from '@/src/navigation/paths';
 import {NavigationContainer} from '@react-navigation/native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {Home, Example} from '@/src/screens';
+import {Home, Example, Map} from '@/src/screens';
 import {RootStackParamList} from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -16,6 +16,7 @@ export default function ApplicationNavigator() {
           screenOptions={{headerShown: false}}>
           <Stack.Screen name={Paths.Home} component={Home} />
           <Stack.Screen name={Paths.Example} component={Example} />
+          <Stack.Screen name={Paths.Map} component={Map} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
