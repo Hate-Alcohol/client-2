@@ -18,6 +18,17 @@ export default function Home() {
           title="Go to Example"
           onPress={() => nav.navigate(Paths.Example)} // 타입 검증됨
         />
+        {/* ✅ 이전에 추가했던 부분: "Go to Map" 버튼 */}
+        <Button
+          title="Go to Map"
+          onPress={() =>
+            nav.navigate(Paths.Map, {
+              userId: 'exampleUserId',
+              role: 'host',
+              hostUserId: undefined,
+            })
+          }
+        />
       </View>
     </SafeScreen>
   );
