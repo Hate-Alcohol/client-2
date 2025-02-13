@@ -24,8 +24,8 @@ export default function Map({route, navigation}: MapScreenProps) {
   const {userId, role, hostUserId} = route.params; // 네비게이션에서 받은 props
   const {location, loading} = useLocation(userId, role, hostUserId);
 
-  // ✅ 백그라운드에서도 위치 공유 유지
-  useBackgroundLocation(userId, role);
+  // // ✅ 백그라운드에서도 위치 공유 유지
+  // useBackgroundLocation(userId, role);
 
   // ✅ "뒤로 가기" 버튼을 눌렀을 때 실행될 함수
   const handleBackPress = () => {
