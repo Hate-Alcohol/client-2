@@ -1,0 +1,64 @@
+import {locationSchema, Location} from '../location/schema';
+import {z} from 'zod';
+
+class LocationService {
+  private webSocket: WebSocket | null = null;
+  private readonly WEBSOCKET_URL = 'ws://192.168.45.215:8080/gps'; // 실제 서버 URL로 변경
+
+  // ✅ 웹소켓 연결
+  connect(userId: string, role: 'host' | 'shared', hostUserId?: string) {
+    if (this.webSocket) {
+      console.log('🔗 이미 웹소켓이 연결되어 있음');
+      return;
+    }
+
+    // 호스트/공유자에 따라 URL 설정
+    const url =
+      role === 'host'
+        ? `${this.WEBSOCKET_URL}?role=host&userId=${userId}`
+        : `${this.WEBSOCKET_URL}?role=shared&userId=${userId}&hostSessionId=${hostUserId}`;
+
+    this.webSocket = new WebSocket(url);
+
+    this.webSocket.onopen = () => console.log('✅ 웹소켓 연결 성공');
+    this.webSocket.onclose = () => {
+      console.log('❌ 웹소켓 연결 종료');
+      this.webSocket = null;
+    };
+    this.webSocket.onerror = (error) =>
+      console.error('🚨 웹소켓 오류 발생:', error);
+  }
+
+  // ✅ 위치 데이터 전송 (호스트만 가능)
+  sendLocation(location: Location) {
+    if (!this.webSocket || this.webSocket.readyState !== WebSocket.OPEN) {
+      console.warn('⚠️ 웹소켓이 열려있지 않음');
+      return;
+    }
+
+    try {
+      // Zod를 이용한 데이터 검증
+      const validatedLocation = locationSchema.parse(location);
+
+      this.webSocket.send(JSON.stringify(validatedLocation));
+      console.log('📡 위치 데이터 전송:', validatedLocation);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error('❌ 위치 데이터 검증 실패:', error.errors);
+      } else {
+        console.error('❌ 위치 데이터 전송 중 오류 발생:', error);
+      }
+    }
+  }
+
+  // ✅ 웹소켓 종료
+  disconnect() {
+    if (this.webSocket) {
+      this.webSocket.close();
+      this.webSocket = null;
+    }
+  }
+}
+
+// 싱글턴 패턴으로 서비스 객체 생성 (전역적으로 사용 가능)
+export const locationService = new LocationService();
