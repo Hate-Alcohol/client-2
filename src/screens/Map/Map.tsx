@@ -22,7 +22,7 @@ type MapScreenProps = NativeStackScreenProps<RootStackParamList, Paths.Map>;
 
 export default function Map({route, navigation}: MapScreenProps) {
   const {userId, role, hostUserId} = route.params; // 네비게이션에서 받은 props
-  const {location, loading} = useLocation(userId, role, hostUserId);
+  const {locations, loading} = useLocation(userId, role, hostUserId);
 
   // // ✅ 백그라운드에서도 위치 공유 유지
   // useBackgroundLocation(userId, role);
@@ -59,26 +59,32 @@ export default function Map({route, navigation}: MapScreenProps) {
           <ActivityIndicator size="large" color="#0000ff" />
           <Text style={styles.loadingText}>위치를 가져오는 중...</Text>
         </View>
-      ) : location ? (
+      ) : Object.keys(locations).length > 0 ? (
         <MapView
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           initialRegion={{
-            latitude: location.latitude,
-            longitude: location.longitude,
+            latitude: locations[userId]?.latitude || 37.5665,
+            longitude: locations[userId]?.longitude || 126.978,
             latitudeDelta: 0.005,
             longitudeDelta: 0.005,
           }}
           showsUserLocation={true}
           followsUserLocation={true}>
-          <Marker
-            coordinate={location}
-            title="내 위치"
-            description="현재 위치입니다.">
-            <View style={styles.markerContainer}>
-              <Image source={imageIcon} style={styles.markerImage} />
-            </View>
-          </Marker>
+          {/* ✅ 모든 사용자의 위치를 지도에 마커로 표시 */}
+          {Object.entries(locations).map(([id, loc]) => (
+            <Marker
+              key={id}
+              coordinate={{
+                latitude: loc.latitude,
+                longitude: loc.longitude,
+              }}
+              title={id === userId ? '나' : `사용자 ${id}`}
+              description={
+                id === userId ? '내 현재 위치' : `사용자 ${id}의 위치`
+              }
+            />
+          ))}
         </MapView>
       ) : (
         <View style={styles.center}>
