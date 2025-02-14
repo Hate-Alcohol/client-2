@@ -10,7 +10,7 @@ export const useLocation = (
   role: 'host' | 'shared',
   hostUserId?: string,
 ) => {
-  const [location, setLocation] = useState<Location | null>(null);
+  const [locations, setLocations] = useState<Record<string, Location>>({}); // ✅ 여러 사용자 위치 저장
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -23,10 +23,15 @@ export const useLocation = (
         return;
       }
 
-      // 🌍 웹소켓 연결 (공유자는 위치 전송 X)
+      // ✅ 웹소켓 연결 (호스트 & 공유자 모두 연결)
       locationService.connect(userId, role, hostUserId);
 
-      // 현재 위치 가져오기
+      // ✅ 위치 업데이트 구독
+      locationService.subscribeToLocationUpdates((updatedLocations) => {
+        setLocations({...updatedLocations});
+      });
+
+      // ✅ 현재 위치 가져오기 (호스트 & 공유자 모두)
       Geolocation.getCurrentPosition(
         (position) => {
           const newLocation: Location = {
@@ -35,12 +40,12 @@ export const useLocation = (
             timestamp: Date.now(),
           };
 
-          setLocation(newLocation);
-          setLoading(false);
+          setLocations((prev) => ({
+            ...prev,
+            [userId]: newLocation, // 내 위치 저장
+          }));
 
-          // if (role === 'host') {
-          //   locationService.sendLocation(newLocation);
-          // }
+          setLoading(false);
         },
         (error) => {
           console.error('⚠️ 위치 가져오기 실패:', error.code, error.message);
@@ -49,34 +54,36 @@ export const useLocation = (
         {enableHighAccuracy: true, timeout: 20000, maximumAge: 0},
       );
 
-      // 실시간 위치 추적 (호스트만 전송)
-      if (role === 'host') {
-        watchId = Geolocation.watchPosition(
-          (position) => {
-            const newLocation: Location = {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-              timestamp: Date.now(),
-            };
+      // ✅ 실시간 위치 추적
+      watchId = Geolocation.watchPosition(
+        (position) => {
+          const newLocation: Location = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            timestamp: Date.now(),
+          };
 
-            setLocation(newLocation);
-            locationService.sendLocation(newLocation);
-          },
-          (error) => {
-            console.error(
-              '⚠️ 실시간 위치 업데이트 실패:',
-              error.code,
-              error.message,
-            );
-          },
-          {
-            enableHighAccuracy: true,
-            distanceFilter: 5, // 5m 이동하면 위치 업데이트
-            timeout: 20000,
-            maximumAge: 10000,
-          },
-        );
-      }
+          setLocations((prev) => ({
+            ...prev,
+            [userId]: newLocation, // 호스트(A)의 위치 업데이트
+          }));
+
+          locationService.sendLocation(newLocation);
+        },
+        (error) => {
+          console.error(
+            '⚠️ 실시간 위치 업데이트 실패:',
+            error.code,
+            error.message,
+          );
+        },
+        {
+          enableHighAccuracy: true,
+          distanceFilter: 5, // 5m 이동하면 위치 업데이트
+          timeout: 20000,
+          maximumAge: 10000,
+        },
+      );
     };
 
     initializeLocationTracking();
@@ -90,5 +97,5 @@ export const useLocation = (
     };
   }, [userId, role, hostUserId]);
 
-  return {location, loading};
+  return {locations, loading};
 };
