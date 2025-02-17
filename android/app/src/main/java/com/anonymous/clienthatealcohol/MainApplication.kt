@@ -1,7 +1,10 @@
 package com.anonymous.clienthatealcohol
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.res.Configuration
+import android.os.Build
 
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
@@ -48,6 +51,15 @@ class MainApplication : Application(), ReactApplication {
       load()
     }
     ApplicationLifecycleDispatcher.onApplicationCreate(this)
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      val channel = NotificationChannel(
+        "my_foreground_service",
+        "Foreground Service",
+        NotificationManager.IMPORTANCE_LOW
+      )
+      getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
+    }
   }
 
   override fun onConfigurationChanged(newConfig: Configuration) {
