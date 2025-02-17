@@ -9,7 +9,6 @@ import {
 import {useRef, useEffect} from 'react';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import SafeScreen from '@/src/components/global/templates/SafeScreen'; // 안전한 화면 래퍼
-import imageIcon from '../../../assets/images/harp_seal.png';
 // import {useLocation} from '../../hooks/domain/location/useLocation'; // 위치 훅 불러오기
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '@/src/navigation/types';
