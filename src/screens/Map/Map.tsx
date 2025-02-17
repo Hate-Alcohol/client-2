@@ -6,10 +6,11 @@ import {
   Image,
   Alert,
 } from 'react-native';
+import {useRef, useEffect} from 'react';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import SafeScreen from '@/src/components/global/templates/SafeScreen'; // 안전한 화면 래퍼
 import imageIcon from '../../../assets/images/harp_seal.png';
-import {useLocation} from '../../hooks/domain/location/useLocation'; // 위치 훅 불러오기
+// import {useLocation} from '../../hooks/domain/location/useLocation'; // 위치 훅 불러오기
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '@/src/navigation/types';
 import {Paths} from '@/src/navigation/paths';
@@ -22,10 +23,27 @@ type MapScreenProps = NativeStackScreenProps<RootStackParamList, Paths.Map>;
 
 export default function Map({route, navigation}: MapScreenProps) {
   const {userId, role, hostUserId} = route.params; // 네비게이션에서 받은 props
-  const {locations, loading} = useLocation(userId, role, hostUserId);
+  const {locations, loading} = useBackgroundLocation(userId, role, hostUserId);
 
-  // // ✅ 백그라운드에서도 위치 공유 유지
-  // useBackgroundLocation(userId, role);
+  // ✅ 지도 Ref 생성
+  const mapRef = useRef<MapView | null>(null);
+
+  // ✅ 위치가 변경될 때 지도 중심을 업데이트
+  useEffect(() => {
+    if (locations[userId]) {
+      const {latitude, longitude} = locations[userId];
+
+      // ✅ 지도 중심 이동 (애니메이션 적용)
+      if (mapRef.current) {
+        mapRef.current.animateToRegion({
+          latitude,
+          longitude,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
+        });
+      }
+    }
+  }, [locations]);
 
   // ✅ "뒤로 가기" 버튼을 눌렀을 때 실행될 함수
   const handleBackPress = () => {
@@ -61,6 +79,7 @@ export default function Map({route, navigation}: MapScreenProps) {
         </View>
       ) : Object.keys(locations).length > 0 ? (
         <MapView
+          ref={mapRef}
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           initialRegion={{
